@@ -452,11 +452,21 @@ try {
   const destination = await page
     .locator("#capabilities")
     .evaluate((el) => el.getBoundingClientRect().top + scrollY - 35);
+  // Observe in the page before clicking; host/driver latency can outlast a scroll.
+  const scrollProbe = await page.evaluateHandle(() => {
+    const positions = [];
+    const record = () => positions.push(scrollY);
+    addEventListener("scroll", record);
+    return { positions, stop: () => removeEventListener("scroll", record) };
+  });
   await page.getByRole("link", { name: "探索云原生能力", exact: true }).click();
-  await page.waitForTimeout(100);
-  const midway = await page.evaluate(() => scrollY);
-  assert.ok(midway > 0 && midway < destination - 3);
   await page.waitForFunction((y) => Math.abs(scrollY - y) < 3, destination);
+  const positions = await scrollProbe.evaluate((probe) => {
+    probe.stop();
+    return probe.positions;
+  });
+  await scrollProbe.dispose();
+  assert.ok(positions.some((y) => y > 0 && y < destination - 3));
   check("Internal navigation scrolls smoothly through intermediate positions");
   assert.deepEqual(errors, []);
   await context.close();
