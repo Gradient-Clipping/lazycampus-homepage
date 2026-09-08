@@ -8,7 +8,8 @@ export async function createBrowser({ software = true } = {}) {
       "--force-color-profile=srgb",
       "--disable-lcd-text",
       "--font-render-hinting=none",
-      ...(software ? ["--disable-gpu"] : []),
+      // Repaint complete tiles so 3D edges do not inherit partial-raster rounding.
+      ...(software ? ["--disable-gpu", "--disable-partial-raster"] : []),
     ],
   };
   if (process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE)

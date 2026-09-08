@@ -107,7 +107,7 @@ function drawCode(
   c.textAlign = "center";
   text(c, "service.ts", 500, 42, 22, "#c5d0e1", 500);
   dot(c, 571, 34, 3.3, editor.committing ? "#82b58a" : "#cfb778");
-  const font = "26px 'Cascadia Code', Consolas, monospace";
+  const font = "26px 'JetBrains Mono', monospace";
   let remaining = editor.characters,
     caret = { x: 101, y: 131 },
     stopped = false;
@@ -115,7 +115,7 @@ function drawCode(
     const y = 131 + i * 42,
       length = tokens.reduce((n, token) => n + token.text.length, 0);
     c.textAlign = "right";
-    c.font = "19px 'Cascadia Code', Consolas, monospace";
+    c.font = "19px 'JetBrains Mono', monospace";
     c.fillStyle = "#66768d";
     c.fillText(String(i + 1), 63, y);
     if (i === 4 && remaining > 0) {

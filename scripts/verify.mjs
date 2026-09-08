@@ -17,6 +17,18 @@ const check = (name, detail) => {
   console.log(`PASS ${name}`);
 };
 const hash = (bytes) => createHash("sha256").update(bytes).digest("hex");
+const visualState = (page) => page.evaluate(() => ({
+  frame: window.__frame,
+  recording: window.__timeline.recording,
+  scroll: { x: scrollX, y: scrollY },
+  active: document.activeElement?.tagName,
+  canvas: [...document.querySelectorAll("canvas")].map((canvas) => ({
+    id: canvas.id,
+    bounds: canvas.getBoundingClientRect().toJSON(),
+    pixels: canvas.toDataURL(),
+  })),
+  html: document.documentElement.outerHTML,
+}));
 async function verifyDeliveryGeometry(page) {
   const packets = await page
     .locator(".pipeline-connector")
@@ -57,6 +69,9 @@ try {
   assert.equal(await page.getByRole("heading", { level: 1 }).count(), 1);
   assert.equal(await page.locator("vite-error-overlay").count(), 0);
   assert.equal(await page.evaluate(() => window.__timeline.version), 7);
+  assert.ok(await page.evaluate(() => [...document.fonts].some((font) =>
+    font.family.replaceAll('"', "") === "JetBrains Mono" && font.status === "loaded",
+  )), "The Canvas code font must be loaded before timeline readiness");
   check("Production page, assets and v7 timeline are ready");
   await verifyDeliveryGeometry(page);
   check(
@@ -139,11 +154,22 @@ try {
     "Mobius mesh rotates with lighting, has transparent corners and a deterministic 288-second cycle",
   );
   await seek(8.2);
+  const fullState = await visualState(page);
   const full = await page.screenshot({ fullPage: true, scale: "css" });
   await seek(41);
   await seek(8.2);
+  const fullRestored = await page.screenshot({ fullPage: true, scale: "css" });
+  if (hash(fullRestored) !== hash(full)) {
+    await writeFile(resolve(out, "full-live.png"), full);
+    await writeFile(resolve(out, "full-restored.png"), fullRestored);
+    await writeFile(resolve(out, "full-mismatch.json"), JSON.stringify({
+      time: 8.2,
+      live: fullState,
+      restored: await visualState(page),
+    }));
+  }
   assert.equal(
-    hash(await page.screenshot({ fullPage: true, scale: "css" })),
+    hash(fullRestored),
     hash(full),
   );
   check(
@@ -300,24 +326,12 @@ try {
       caret: "hide",
     });
     if (hash(restored) !== hash(live)) {
-      const state = (target) => target.evaluate(() => ({
-        frame: window.__frame,
-        recording: window.__timeline.recording,
-        scroll: { x: scrollX, y: scrollY },
-        active: document.activeElement?.outerHTML,
-        canvas: [...document.querySelectorAll("canvas")].map((canvas) => ({
-          id: canvas.id,
-          bounds: canvas.getBoundingClientRect().toJSON(),
-          pixels: canvas.toDataURL(),
-        })),
-        html: document.documentElement.outerHTML,
-      }));
       await writeFile(resolve(out, "replay-live.png"), live);
       await writeFile(resolve(out, "replay-restored.png"), restored);
       await writeFile(resolve(out, "replay-mismatch.json"), JSON.stringify({
         time: t,
-        live: await state(page),
-        restored: await state(replay.page),
+        live: await visualState(page),
+        restored: await visualState(replay.page),
       }));
     }
     assert.equal(

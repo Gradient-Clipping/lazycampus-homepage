@@ -3,6 +3,7 @@
 @import url("@fontsource/manrope/latin-600.css");
 @import url("@fontsource/manrope/latin-700.css");
 @import url("@fontsource/manrope/latin-800.css");
+@import url("@fontsource/jetbrains-mono/latin-400.css");
 
 :root {
   font-family: "Manrope", "Microsoft YaHei", "PingFang SC", sans-serif;

@@ -209,6 +209,8 @@ export function mountTimeline(ready: Ready) {
   document.addEventListener("click", closeMenu);
   Promise.all([
     document.fonts.ready,
+    // Canvas-only fonts must be requested explicitly before the first seek.
+    document.fonts.load('26px "JetBrains Mono"'),
     sequence.prepare(),
     prepareSuppliedIcons(),
     prepareLaptopShell(),

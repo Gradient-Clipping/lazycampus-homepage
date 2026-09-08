@@ -1,3 +1,16 @@
+# 生产容器与 Linux 渲染验收
+
+2026-09-08；新源码仓库 `Gradient-Clipping/lazycampus-homepage`。生产构建为 `index-CQX4zw0p.js` / `index-Bx7Kkdc2.css`。
+
+- Docker 使用固定摘要的 Node 24.19.0 构建与非 root Nginx 运行镜像。只读根文件系统、32 MiB `/tmp`、64 MiB 内存与 0.1 CPU 条件下，健康检查、gzip、缓存策略、静态资源 MIME 与缺失资源 404 检查通过。
+- 26 项物理与交互状态测试通过。Linux Chromium 153.0.8010.12 的 26 项浏览器检查通过，包含 320 / 390 / 768 / 1024 px、整页与 DPR 2 随机寻道、独立上下文的交互记录回放、用户接管与减少动态效果。
+- 等宽代码字体改为随站点提供的 JetBrains Mono 400，增加约 21 KiB WOFF2。`__ready` 在字体明确加载后才完成，消除 Linux 系统等宽字体回退导致的字形与字宽差异。
+- 无损导出与浏览器验证关闭 Chromium 部分栅格重绘，消除 3D 边缘受重绘历史影响的舍入差异。断言仍为完整 PNG 的 SHA-256 严格相等，没有放宽像素容差。
+- 验证失败时保留整页或交互回放的两份截图及 DOM / Canvas / 时间状态，供后续定位；正常实时浏览继续使用浏览器加速。
+- 云端验证与镜像发布记录见仓库的 `Verify and publish homepage` 工作流；公网切换由独立的 `server-gitops` 仓库管理。
+
+---
+
 # v8.1 交付圆点与技术底座布局
 
 2026-09-08；生产预览 4174。构建文件：`index-BQ8bC9vO.js` / `index-sxq6PyPf.css`。

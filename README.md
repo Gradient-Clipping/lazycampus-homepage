@@ -151,7 +151,9 @@ npm run render -- --url http://127.0.0.1:4174 --start 7 --duration 3 --out rende
 
 输出包含逐帧 PNG、`master-ffv1.mkv`、带每帧 SHA-256 与环境信息的 `manifest.json`。FFV1 使用 level 3 / BGR0；编码后将视频和 PNG 都解码为 RGB24，逐帧比较 framemd5，一致后才报告无损成功。也可用 `--encode h264rgb` 输出无损 RGB H.264，或用 `--encode none` 只保存 PNG。
 
-导出固定 sRGB、字体与软件光栅化；实时预览保留正常浏览器加速。这里的无损指页面像素到输出文件不再引入损失，不代表跨操作系统、浏览器和字体环境的像素天然一致。
+代码区使用随页面提供的 JetBrains Mono，初始化显式等待字体加载，避免依赖系统等宽字体。字体授权文件位于 `public/fonts/`。
+
+导出固定 sRGB、字体与软件光栅化，并关闭 Chromium 的部分栅格重绘，避免 3D 边缘因重绘历史产生舍入差异；实时预览保留正常浏览器加速。渲染参数参考 [Chrome 工具标志说明](https://github.com/GoogleChrome/chrome-launcher/blob/main/docs/chrome-flags-for-tools.md#rendering--gpu)。这里的无损指页面像素到输出文件不再引入损失，不代表跨操作系统、浏览器和字体环境的像素天然一致。
 
 ## 可选的录屏帧映射接口
 
