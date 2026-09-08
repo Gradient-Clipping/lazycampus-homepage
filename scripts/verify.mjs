@@ -294,14 +294,34 @@ try {
   for (const t of [2.81, 3.21, 7.12, 10.78123, 13.34, 200]) {
     const live = await bytesAt(t);
     await replay.page.evaluate((t) => window.__seek(t), t);
+    const restored = await replay.page.screenshot({
+      type: "png",
+      scale: "device",
+      caret: "hide",
+    });
+    if (hash(restored) !== hash(live)) {
+      const state = (target) => target.evaluate(() => ({
+        frame: window.__frame,
+        recording: window.__timeline.recording,
+        scroll: { x: scrollX, y: scrollY },
+        active: document.activeElement?.outerHTML,
+        canvas: [...document.querySelectorAll("canvas")].map((canvas) => ({
+          id: canvas.id,
+          bounds: canvas.getBoundingClientRect().toJSON(),
+          pixels: canvas.toDataURL(),
+        })),
+        html: document.documentElement.outerHTML,
+      }));
+      await writeFile(resolve(out, "replay-live.png"), live);
+      await writeFile(resolve(out, "replay-restored.png"), restored);
+      await writeFile(resolve(out, "replay-mismatch.json"), JSON.stringify({
+        time: t,
+        live: await state(page),
+        restored: await state(replay.page),
+      }));
+    }
     assert.equal(
-      hash(
-        await replay.page.screenshot({
-          type: "png",
-          scale: "device",
-          caret: "hide",
-        }),
-      ),
+      hash(restored),
       hash(live),
       `Recording replay t=${t}`,
     );
