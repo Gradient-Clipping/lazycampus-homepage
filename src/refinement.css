@@ -1,0 +1,671 @@
+/* Browser navigation is a user gesture; capture mode retains fixed viewport positions. */
+html {
+  scroll-behavior: smooth;
+}
+.skip-link {
+  clip-path: inset(50%);
+}
+.skip-link:focus {
+  clip-path: inset(0);
+}
+html[data-capture="true"] {
+  scroll-behavior: auto;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+.scene {
+  pointer-events: auto;
+  transform: scale(calc(100cqw / 820px));
+  left: 0;
+  top: 12px;
+}
+.scene-viewport {
+  overflow: clip;
+}
+.studio-light {
+  position: absolute;
+  inset: 45px 8px 80px 50px;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 70% 33%, #dae0f59c, transparent 65%),
+    radial-gradient(ellipse at 30% 70%, #e2dfd780, transparent 60%);
+  pointer-events: none;
+}
+.studio-heading {
+  position: absolute;
+  top: 4px;
+  left: 105px;
+  right: 28px;
+  display: flex;
+  justify-content: space-between;
+  color: #697286;
+  font-size: 10px;
+  letter-spacing: 2px;
+}
+.studio-heading span:first-child {
+  color: #33415b;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+.card-motion.laptop-motion {
+  left: 76px;
+  top: 59px;
+  width: 680px;
+  height: 394px;
+  min-height: 394px;
+  z-index: 3;
+  transform-origin: 340px 197px;
+}
+.laptop {
+  position: relative;
+  width: 680px;
+  height: 394px;
+  transform-origin: 340px 197px;
+  transform-style: preserve-3d;
+}
+.laptop-lid {
+  position: absolute;
+  /* Keep Canvas and semantic hit targets on one explicit plane inside the 3D shell. */
+  transform: translateZ(0);
+  width: 680px;
+  height: 394px;
+  border-radius: 15px 15px 7px 7px;
+  background: linear-gradient(
+    135deg,
+    #454b54,
+    #0e1118 25%,
+    #1b202b 80%,
+    #414953
+  );
+  border: 1px solid #a1a8b2;
+  box-shadow:
+    0 0 0 1px #555d6b,
+    inset 0 0 0 0.6px #d6dbe2,
+    0 10px 20px -15px #24314a70;
+}
+.laptop-display {
+  position: absolute;
+  left: 5px;
+  top: 8px;
+  width: 668px;
+  height: 376.752px;
+  border-radius: 9px 9px 3px 3px;
+  overflow: hidden;
+  background: #f5f7fa;
+}
+#workspace-canvas {
+  width: 100%;
+  height: 100%;
+}
+.screen-glass {
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px #00000028;
+  background: linear-gradient(123deg, #ffffff10, transparent 45%, #b8c9ff08);
+  pointer-events: none;
+}
+.webcam {
+  position: absolute;
+  top: 2px;
+  left: 337px;
+  width: 4px;
+  height: 4px;
+  background: #151920;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+}
+.webcam i {
+  width: 2.5px;
+  height: 2.5px;
+  border: 1px solid #3e444e;
+  background: #112b3b;
+  border-radius: 50%;
+}
+.lid-signature {
+  position: absolute;
+  bottom: 5px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  color: #b6bdc8;
+  font-size: 7px;
+  letter-spacing: 1px;
+}
+.laptop-hinge {
+  position: absolute;
+  left: 30px;
+  top: 392px;
+  width: 620px;
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(#252b35, #535a67, #191f2a);
+}
+.laptop-deck-plane {
+  position: absolute;
+  top: 394px;
+  left: 0;
+  width: 680px;
+  height: 337.82px;
+  transform-origin: 50% 0;
+  transform: rotateX(85deg);
+  transform-style: preserve-3d;
+}
+.laptop-deck {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  filter: none;
+}
+.deck-probe {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+.deck-probe.back-left {
+  left: 0;
+  top: 0;
+}
+.deck-probe.back-right {
+  left: 100%;
+  top: 0;
+}
+.deck-probe.front-left {
+  left: 0;
+  top: 100%;
+}
+.deck-probe.front-right {
+  left: 100%;
+  top: 100%;
+}
+.screen-home {
+  left: 3%;
+  top: 2%;
+  width: 13%;
+  height: 12%;
+  border-radius: 20px;
+}
+.concept-control {
+  border-radius: 30px;
+}
+.screen-controls {
+  position: absolute;
+  inset: 0;
+}
+.screen-hit {
+  position: absolute;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  padding: 0;
+  touch-action: manipulation;
+}
+.screen-hit:hover {
+  background: #304cbd09;
+  border-color: #4d6bd951;
+}
+.screen-hit:active {
+  background: #2f4ba81a;
+}
+.screen-hit:focus-visible {
+  outline: 3px solid #e89557;
+  outline-offset: -2px;
+}
+.screen-tab {
+  left: 1.4%;
+  width: 15.6%;
+  height: 7.62%;
+}
+.tab-overview {
+  top: 20.21%;
+}
+.tab-campus {
+  top: 30.32%;
+}
+.tab-delivery {
+  top: 40.43%;
+}
+.screen-deploy {
+  left: 75.5%;
+  top: 80.1418%;
+  width: 20.7%;
+  height: 9.7518%;
+  border-radius: 7px;
+}
+.screen-deploy:hover {
+  background: #ffffff16;
+  border-color: #ffffff50;
+}
+.screen-open-campus {
+  left: 23.9%;
+  top: 62.766%;
+  width: 31.5%;
+  height: 6.738%;
+}
+.screen-hit[hidden] {
+  display: none;
+}
+.studio-caption {
+  position: absolute;
+  left: 111px;
+  right: 36px;
+  top: 611px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+.studio-caption > svg {
+  width: 30px;
+  color: #3c5ed8;
+}
+.studio-caption strong {
+  display: block;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+.studio-caption div > span {
+  display: block;
+  margin-top: 3px;
+  color: #717989;
+  font-size: 10px;
+}
+.studio-caption-index {
+  margin-left: auto;
+  color: #7b8597;
+  font-size: 9px;
+  letter-spacing: 2px;
+}
+.replay-demo {
+  margin-left: auto;
+  border: 0;
+  border-radius: 20px;
+  padding: 10px 12px;
+  min-height: 36px;
+  background: #e9edf400;
+  color: #5c6a82;
+  font-size: 11px;
+}
+.replay-demo:hover {
+  background: #e1e6f2;
+  color: #304571;
+}
+.replay-demo:focus-visible {
+  outline: 2px solid #476dcc;
+  outline-offset: 2px;
+}
+.hud-recording {
+  border: 1px solid #78856b;
+  border-radius: 5px;
+  background: transparent;
+  color: inherit;
+  padding: 7px 9px;
+  font-size: 10px;
+}
+.world-canvas {
+  pointer-events: none;
+}
+
+/* Line endpoints, arrowheads and packet share the same SVG coordinate system. */
+.delivery-preview {
+  width: 380px;
+  max-width: 87%;
+  padding: 25px 26px;
+  transform: rotate(-3deg);
+}
+.pipeline-track {
+  display: grid;
+  grid-template-columns: 65px minmax(20px, 1fr) 65px minmax(20px, 1fr) 65px;
+  align-items: start;
+  margin: 26px 0 23px;
+}
+.pipeline-track > div {
+  width: 65px;
+}
+.pipeline-node {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+}
+.pipeline-connector {
+  width: 100%;
+  height: 44px;
+  color: #8a9ab6;
+  display: block;
+  overflow: visible;
+}
+.pipeline-node > .tech-icon {
+  width: 26px;
+  height: 26px;
+}
+.pipeline-track strong {
+  font-size: 9px;
+  margin-top: 9px;
+}
+.pipeline-track small {
+  font-size: 7px;
+  color: #66748b;
+}
+.code-line {
+  justify-content: center;
+  gap: 7px;
+  font-size: 9px;
+  color: #627088;
+  padding: 10px 8px;
+  white-space: nowrap;
+}
+.code-line .code-return {
+  color: #627088;
+  margin-right: 2px;
+}
+.code-line > svg {
+  width: 13px;
+  height: 13px;
+  color: #487041;
+  margin-left: 2px;
+}
+.delivery-heading > span:last-child {
+  color: #66748b;
+}
+.easy-stamp {
+  right: -2px;
+  bottom: 9px;
+  padding: 8px 10px;
+}
+
+.product-showcase {
+  padding-top: 94px;
+  padding-bottom: 75px;
+}
+.product-showcase > .section-top {
+  margin-bottom: 32px;
+}
+.product-story {
+  display: grid;
+  grid-template-columns: 35% 1fr;
+  align-items: center;
+  gap: 48px;
+  padding: 36px 0 67px;
+}
+.product-story + .product-story {
+  border-top: 1px solid var(--line);
+  padding-top: 68px;
+}
+.product-story-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #747e6a;
+}
+.product-story .live-copy h2 {
+  font-size: 42px;
+  letter-spacing: -1.8px;
+  line-height: 1.35;
+  margin: 20px 0;
+}
+.product-story .live-copy p {
+  color: #737b6b;
+  font-size: 12px;
+}
+.product-feature-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 16px;
+  margin-top: 23px;
+  font-size: 10px;
+  color: #616b56;
+}
+.product-feature-list span {
+  border-bottom: 1px solid #d6dbce;
+  padding-bottom: 3px;
+}
+.product-story .live-caption {
+  margin-top: 32px;
+  color: #67745a;
+}
+.campus-concept {
+  margin: 0;
+  border-radius: 15px;
+  overflow: hidden;
+  border: 1px solid #e2dfd5;
+  box-shadow: 0 26px 50px -34px #514d3d60;
+}
+.campus-concept > img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.campus-concept figcaption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: #f0eee5;
+  font-size: 9px;
+  color: #75725f;
+}
+.campus-concept figcaption strong {
+  color: #484b40;
+  font-size: 12px;
+}
+.product-story .product-browser {
+  transform: none;
+}
+.product-showcase .real-products {
+  margin-top: 0;
+}
+
+.continuity-art {
+  width: 100%;
+  margin: 0;
+  overflow: visible;
+  border-radius: 0;
+  background: transparent;
+  position: relative;
+}
+.art-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 25px 28px 0;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: #69735c;
+}
+#about-sculpture {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 600/480;
+}
+.continuity-art figcaption {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 28px 26px;
+  font-size: 11px;
+  color: #4d5c41;
+}
+.pod-hit {
+  left: 0;
+  top: 0;
+  border-radius: 15px;
+}
+.screen-hit:disabled {
+  pointer-events: none;
+}
+.about-layout {
+  grid-template-columns: 46% 1fr;
+  gap: 8%;
+  align-items: center;
+}
+.about-copy h2 {
+  font-size: 30px;
+}
+.contact-email {
+  display: inline-flex;
+  margin-top: 22px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #899678;
+  color: #36492d;
+  font-size: 16px;
+  font-weight: 600;
+}
+.contact-email:hover {
+  color: #b74726;
+  border-color: currentColor;
+}
+
+/* Preserve the original icon artwork. Light wells retain internal symbol contrast. */
+.approach-section .supplied-icon {
+  filter: none;
+  background: #f3f5ee;
+  border-radius: 7px;
+  padding: 4px;
+  box-sizing: content-box;
+}
+.approach-section .icon-git {
+  filter: none;
+}
+.approach-section .principle-symbol {
+  color: #d4dfc6;
+}
+.platform-capabilities > div > .tech-icon {
+  color: #d4dfc6;
+}
+.platform-capabilities p,
+.approach-layout > div > p {
+  color: #b5c0a8;
+}
+.tech-name > .tech-icon {
+  color: #4e6543;
+}
+.real-icon.blue {
+  color: #3b61a2;
+}
+.real-icon.peach {
+  color: #966032;
+}
+.browser-chrome {
+  color: #68755c;
+}
+
+@media (max-width: 1100px) {
+  .product-story {
+    gap: 30px;
+    grid-template-columns: 34% 1fr;
+  }
+  .product-story .live-copy h2 {
+    font-size: 33px;
+  }
+  .about-copy h2 {
+    font-size: 25px;
+  }
+  .about-layout {
+    gap: 5%;
+  }
+}
+@media (max-width: 800px) {
+  .product-story {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    padding-top: 23px;
+    padding-bottom: 42px;
+  }
+  .product-story + .product-story {
+    padding-top: 45px;
+  }
+  .product-story .live-copy h2 {
+    font-size: 36px;
+  }
+  .product-story .live-caption {
+    margin-top: 20px;
+  }
+  .product-showcase {
+    padding-top: 62px;
+    padding-bottom: 56px;
+  }
+  .about-layout {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .continuity-art {
+    max-width: 570px;
+    margin: 0 auto;
+  }
+  .about-copy h2 {
+    font-size: 30px;
+  }
+}
+@media (max-width: 600px) {
+  .scene-viewport {
+    width: calc(100% + 24px);
+    margin: 0 -12px 10px;
+    aspect-ratio: 760/655;
+    overflow: clip;
+  }
+  .studio-heading {
+    top: 4px;
+  }
+  .scene-viewport {
+    aspect-ratio: 820 / 674;
+    margin-bottom: 0;
+    overflow: clip;
+  }
+  .product-story .live-copy h2 {
+    font-size: 31px;
+  }
+  .product-showcase > .section-top .section-index {
+    display: none;
+  }
+  .product-story .live-copy p {
+    font-size: 11px;
+  }
+  .product-feature-list {
+    font-size: 10px;
+  }
+  .campus-concept figcaption {
+    padding: 12px;
+  }
+  .campus-concept figcaption span {
+    font-size: 8px;
+  }
+  .delivery-preview {
+    padding: 18px 18px;
+    max-width: 92%;
+  }
+  .pipeline-track {
+    grid-template-columns: 55px minmax(14px, 1fr) 55px minmax(14px, 1fr) 55px;
+  }
+  .pipeline-track > div {
+    width: 55px;
+  }
+  .code-line {
+    gap: 5px;
+    font-size: 8px;
+  }
+  .continuity-art figcaption {
+    margin: 0 20px 23px;
+    font-size: 10px;
+  }
+  .art-topline {
+    margin: 21px 20px 0;
+    font-size: 8px;
+  }
+  .about-copy h2 {
+    font-size: 25px;
+  }
+  .contact-email {
+    font-size: 14px;
+    margin-top: 15px;
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "enabled": false,
+  "fps": 30,
+  "frameCount": 0,
+  "startTime": 2,
+  "startNumber": 0,
+  "pattern": "/media/product/frame-{frame}.png",
+  "poster": "/media/smart-shop-concept.png",
+  "label": "Smart Shop · AI 概念视觉",
+  "source": "OpenAI image_gen · conceptual product design"
+}

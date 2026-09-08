@@ -1,0 +1,8 @@
+node_modules/
+dist/
+renders/
+.cache/
+*.tsbuildinfo
+*.log
+.env*
+!.env.example
