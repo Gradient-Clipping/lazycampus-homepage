@@ -5,10 +5,14 @@ const base = process.env.VERIFY_URL || "http://127.0.0.1:4173";
 const browser = await createBrowser();
 try {
   const { page, context, errors } = await preparePage(browser, { dpr: 1 });
-  const held = [];
+  let releaseDownloads;
+  const downloads = new Promise((resolve) => { releaseDownloads = resolve; });
   const requests = [];
   // Leave all font/image downloads pending: the hero must remain usable anyway.
-  await page.route(/\.(?:woff2?|webp)(?:\?|$)/, (route) => { held.push(route); });
+  await page.route(/\.(?:woff2?|webp)(?:\?|$)/, async (route) => {
+    await downloads;
+    await route.continue();
+  });
   page.on("request", (request) => requests.push(request.url()));
   await page.goto(base, { waitUntil: "domcontentloaded" });
   await page.waitForFunction(() => window.__frame?.t > 0.1, null, { timeout: 5000 });
@@ -25,8 +29,7 @@ try {
     page.waitForRequest(/smart-shop-concept.*\.webp/),
     page.locator("#product-canvas").scrollIntoViewIfNeeded(),
   ]);
-  await page.unroute(/\.(?:woff2?|webp)(?:\?|$)/);
-  await Promise.all(held.map((route) => route.continue()));
+  releaseDownloads();
   await page.evaluate(() => window.__ready);
   await page.waitForFunction(() => document.querySelector("#product-canvas")
     .getContext("2d").getImageData(10, 10, 1, 1).data[3] > 0);
