@@ -5,12 +5,12 @@
 let vscodeIcon: HTMLCanvasElement | undefined;
 export const getVscodeIcon = () => vscodeIcon;
 
-export async function prepareSuppliedIcons() {
+export async function prepareSuppliedIcons(sources: Record<string, string>) {
   await Promise.all(
-    ["kubernetes", "git-branch", "flux", "visual-studio-code"].map(
-      async (name) => {
+    Object.entries(sources).map(
+      async ([name, svg]) => {
         const source = new Image();
-        source.src = `/icons/${name}.svg`;
+        source.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
         await source.decode();
         const height = 256,
           width = Math.round(

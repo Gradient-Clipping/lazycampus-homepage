@@ -12,7 +12,7 @@ Flux 自动写回 [server-gitops](https://github.com/Gradient-Clipping/server-gi
 
 旧 [lazycampus-site](https://github.com/Gradient-Clipping/lazycampus-site) 仓库保留历史页面，其工作流只验证，不再发布镜像。主页的新镜像名称使两个仓库的发布来源独立。
 
-新仓库需要配置 Repository Secrets `TCR_USERNAME` 和 `TCR_PASSWORD`；实际值只保存在凭据存储中。健康检查为 `/healthz`，容器监听 8080，使用非 root 用户，支持只读根文件系统与可写 `/tmp`。HTML 和未指纹化资源按请求重新验证缓存；Vite 指纹资源长期缓存，JS / CSS 启用 gzip。
+新仓库需要配置 Repository Secrets `TCR_USERNAME` 和 `TCR_PASSWORD`；实际值只保存在凭据存储中。健康检查为 `/healthz`，容器监听 8080，使用非 root 用户，支持只读根文件系统与可写 `/tmp`。公开静态 HTML 使用 `public, max-age=0, s-maxage=300`：浏览器重新验证，CDN 缓存五分钟，因此入口发布最多可能延迟五分钟可见。未指纹化资源按请求重新验证；Vite 指纹资源长期缓存，JS / CSS 启用 gzip。
 
 ```sh
 docker build --tag lazycampus-homepage:local .
@@ -21,7 +21,7 @@ docker run --rm --read-only --tmpfs /tmp:rw,noexec,nosuid,size=32m \
   --memory 64m --cpus 0.1 -p 127.0.0.1:8080:8080 lazycampus-homepage:local
 ```
 
-回滚通过 GitOps 提交执行：先在 `image-automation.yaml` 暂停该应用的 `ImageUpdateAutomation`，再在 `deployment.yaml` 固定已验证镜像；确认恢复后再调整镜像策略并恢复自动更新。不要直接修改集群 Deployment。
+回滚通过 GitOps 提交执行：先将该应用 ImagePolicy 的 `platform.lazycampus.com/image-automation` 标签改为 `paused`，等 Flux 应用后在 `deployment.yaml` 固定已验证镜像；恢复标签 `platform-images` 后重新自动更新。不要暂停共享写回任务或直接修改集群 Deployment。
 
 ## 运行与预览
 
@@ -66,6 +66,11 @@ npm run preview
 About 区的 Möbius 环带围绕自身中线缓慢卷动，并叠加整体逆时针旋转。中心线在内禀卷动中保持不动，每个截面绕其切线旋转，曲面法线和光照同步变化。卷动周期 72 秒，整体旋转周期 96 秒。Canvas 透明，没有独立底板，柔和投影直接融入页面。减少动态效果时曲面静止。页面内部锚点平滑滚动；减少动态效果和导出模式直接定位。
 
 性能处理：
+
+- 普通访问同步绘制首屏电脑；字体、图标和键盘栅格缓存异步增强，不等待产品图下载。`?render` 保留严格就绪屏障。
+- 产品图提供原尺寸 WebP（约 111 KB/张，原 PNG 保留），由 Vite 生成内容指纹 URL；Easy Campus 原生懒加载，Smart Shop 接近视口 800 px 时准备。
+- 产品 manifest 随构建打包，图标 SVG 随脚本内联，不再额外回源；修改 manifest 后需要重新构建发布。
+- `node scripts/verify-loading.mjs` 模拟资源挂起和失败，验证电脑仍可绘制、交互，迟到的资源不会重置时钟。
 
 - 弹簧解析状态转移矩阵初始化编译，避免每个质点反复计算三角函数。
 - 主场景使用 240 Hz Float32Array：默认 32 秒缓存为 614,480 字节；每次有效操作按剩余步骤长度预计算接续片段。软环与绳索原语保留但不加载到首页。
@@ -163,7 +168,7 @@ npm run render -- --url http://127.0.0.1:4174 --start 7 --duration 3 --out rende
 npm run extract -- --input "path/to/recording.mp4" --out public/media/my-recording --fps 30 --duration 6 --width 720 --format png --label "产品演示"
 ```
 
-把生成的 manifest 内容复制到 `public/media/product/manifest.json`。支持 PNG / JPEG、`startTime`、`fps`、`startNumber` 与六位 `{frame}` 模板。图像在 `__ready` 前解码，选帧为 `floor((t-startTime)*fps)`，末帧保持。限制为 900 帧 / 512 MiB 解码预算，并发解码数 6。
+把生成的 manifest 内容复制到 `public/media/product/manifest.json` 后重新构建。支持 PNG / JPEG、`startTime`、`fps`、`startNumber` 与六位 `{frame}` 模板。导出模式下图像在 `__ready` 前解码；普通访问接近产品区时加载。选帧为 `floor((t-startTime)*fps)`，末帧保持。限制为 900 帧 / 512 MiB 解码预算，并发解码数 6。
 
 ## 验证
 

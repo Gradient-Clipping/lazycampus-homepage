@@ -14,7 +14,7 @@ assert.match(health.headers.get("cache-control"), /no-store/);
 const entry = await get("/");
 assert.equal(entry.status, 200);
 assert.match(entry.headers.get("content-type"), /text\/html/);
-assert.match(entry.headers.get("cache-control"), /no-cache/);
+assert.match(entry.headers.get("cache-control"), /public, max-age=0, s-maxage=300/);
 const html = await entry.text();
 assert.match(html, /LaZy Campus/);
 assert.match(html, /云原生/);
@@ -32,7 +32,7 @@ for (const path of assets) {
   assert.ok((await response.text()).length > 1000);
 }
 
-for (const path of ["/assets/missing-release.js", "/media/missing-image.png", "/icons/missing-icon.svg"]) {
+for (const path of ["/assets/missing-release.js", "/media/missing-image.png", "/media/missing-image.webp", "/icons/missing-icon.svg"]) {
   const response = await get(path);
   assert.equal(response.status, 404, path);
   assert.doesNotMatch(response.headers.get("cache-control") || "", /immutable/);

@@ -4,7 +4,7 @@
 
 ## 唯一时间入口
 
-`window.__seek(t)` 同步更新 DOM、Canvas、SVG 和 HUD，并停止实时预览。`__ready` 等待字体、产品素材、原始图标和键盘缓存准备完毕。预览适配器只计算 `start + (timestamp - epoch) / 1000`，再进入同一个 `__seek`；没有 `t += dt`、CSS keyframes、异步补间或逐帧物理积分。
+`window.__seek(t)` 同步更新 DOM、Canvas、SVG 和 HUD，并停止实时预览。普通访问先同步绘制电脑并播放，字体和图标缓存随后补齐，产品画面接近视口时才加载；这些下载失败不会阻止电脑交互。`__ready` 在普通访问中等待首屏增强资源结束，在 `?render` 导出模式中严格等待字体、全部产品素材、原始图标和键盘缓存准备完毕。异步资源使用 `repaintTimeline()` 重绘当前时刻，不暂停播放、不重置用户操作。预览适配器只计算 `start + (timestamp - epoch) / 1000`，再进入同一个 `__seek`；没有 `t += dt`、CSS keyframes、异步补间或逐帧物理积分。
 
 确定性定义为 `render(t; fixedRecording, fixedAssets, fixedViewport)`。用户点击改变不可变意图记录；对固定记录，任意时间和任意寻道顺序得到同一画面。不同输入记录自然可以产生不同结果。
 

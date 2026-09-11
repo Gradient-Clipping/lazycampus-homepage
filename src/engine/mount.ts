@@ -1,11 +1,17 @@
 import { arrival, clamp, squash } from "./math";
-import { initializeTimeline, play } from "./timeline";
+import { initializeTimeline, play, repaintTimeline } from "./timeline";
 import { DURATION, phaseAt } from "./constants";
 import { drawSculpture, drawStudio } from "./sculpture";
 import { deliveryPacket, drawWorkspace } from "./workspace";
-import { ProductSequence, sequenceFrame } from "./sequence";
+import { ProductSequence, sequenceFrame, type SequenceManifest } from "./sequence";
 import { prepareSuppliedIcons } from "./icons";
 import { prepareLaptopShell } from "./hardware";
+import suppliedManifest from "../../public/media/product/manifest.json";
+import smartShopPoster from "../assets/smart-shop-concept.webp";
+import kubernetes from "../../public/icons/kubernetes.svg?raw";
+import gitBranch from "../../public/icons/git-branch.svg?raw";
+import flux from "../../public/icons/flux.svg?raw";
+import vscode from "../../public/icons/visual-studio-code.svg?raw";
 import {
   canAct,
   controlLabel,
@@ -207,34 +213,66 @@ export function mountTimeline(ready: Ready) {
       link.closest<HTMLDetailsElement>(".mobile-nav")?.removeAttribute("open");
   };
   document.addEventListener("click", closeMenu);
-  Promise.all([
-    document.fonts.ready,
-    // Canvas-only fonts must be requested explicitly before the first seek.
-    document.fonts.load('26px "JetBrains Mono"'),
-    sequence.prepare(),
-    prepareSuppliedIcons(),
+  const capture = params.has("render");
+  const autoplay = !params.has("t") && !params.has("paused") && !capture && !reducedMotion;
+  const queryTime = params.has("t") ? Number(params.get("t")) : autoplay ? 0 : 3.2;
+  const start = () => {
+    window.__seek(Number.isFinite(queryTime) ? queryTime : 3.2);
+    performance.mark("homepage:hero-ready");
+    if (autoplay) play();
+  };
+  const refresh = () => {
+    if (!disposed) repaintTimeline();
+  };
+  let productReady: Promise<void> | undefined;
+  // Bundle release-owned metadata instead of fetching a manifest before the image.
+  const manifest = {
+    ...suppliedManifest,
+    poster: suppliedManifest.poster === "/media/smart-shop-concept.png"
+      ? smartShopPoster
+      : suppliedManifest.poster,
+  } as SequenceManifest;
+  const prepareProduct = () => productReady ??= sequence.prepare(manifest).then(() => {
+    if (disposed) return;
+    required("sequence-label").textContent = sequence.manifest.label;
+    refresh();
+  });
+  const productError = (error: unknown) => {
+    if (disposed) return;
+    const el = required("sequence-error");
+    el.hidden = false;
+    el.textContent = "产品画面暂时无法载入，请刷新后重试。";
+    console.warn("Product artwork unavailable", error);
+  };
+  let productObserver: IntersectionObserver | undefined;
+  if (!capture) {
+    // Render the laptop now. Fonts and below-fold artwork must never gate the hero.
+    start();
+    productObserver = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        productObserver?.disconnect();
+        void prepareProduct().catch(productError);
+      }
+    }, { rootMargin: "800px" });
+    productObserver.observe(productCanvas);
+  }
+  const enhancements = [
+    document.fonts.load('26px "JetBrains Mono"').then(() => document.fonts.ready),
+    prepareSuppliedIcons({ kubernetes, "git-branch": gitBranch, flux, "visual-studio-code": vscode }),
     prepareLaptopShell(),
-    required<HTMLImageElement>("easy-campus-concept").decode(),
-  ])
+  ].map((task) => task.then(refresh));
+  // Exports still have a strict barrier so arbitrary seeks remain deterministic.
+  const preparation = capture
+    ? Promise.all([...enhancements, prepareProduct(), required<HTMLImageElement>("easy-campus-concept").decode()])
+    : Promise.allSettled(enhancements);
+  preparation
     .then(() => {
       if (disposed) return;
-      required("sequence-label").textContent = sequence.manifest.label;
-      const queryTime = params.has("t")
-        ? Number(params.get("t"))
-        : !reducedMotion && !params.has("paused") && !params.has("render")
-          ? 0
-          : 3.2;
-      window.__seek(Number.isFinite(queryTime) ? queryTime : 3.2);
+      if (capture) start();
       ready.resolve();
-      if (
-        !params.has("t") &&
-        !params.has("paused") &&
-        !params.has("render") &&
-        !reducedMotion
-      )
-        play();
     })
     .catch((error) => {
+      if (disposed) return;
       const message = error instanceof Error ? error.message : String(error);
       window.__renderError = message;
       const el = required("sequence-error");
@@ -245,6 +283,7 @@ export function mountTimeline(ready: Ready) {
     });
   return () => {
     disposed = true;
+    productObserver?.disconnect();
     document.removeEventListener("click", closeMenu);
     window.removeEventListener("resize", resizeDelivery);
     cleanup();

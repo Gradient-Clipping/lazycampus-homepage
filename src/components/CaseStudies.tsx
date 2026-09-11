@@ -1,5 +1,6 @@
 import { Arrow, TechIcon } from "./Icons";
 import { site } from "../config";
+import campusConcept from "../assets/easy-campus-concept.webp";
 
 export function CaseStudies() {
   return (
@@ -45,7 +46,9 @@ export function CaseStudies() {
           <figure className="case-art campus-concept">
             <img
               id="easy-campus-concept"
-              src="/media/easy-campus-concept.png"
+              src={campusConcept}
+              loading={new URLSearchParams(location.search).has("render") ? "eager" : "lazy"}
+              decoding="async"
               width="1536"
               height="1024"
               alt="Easy Campus 小程序概念图：暖色首页展示今日课程、成绩、电费，旁侧手机展示每周课表"

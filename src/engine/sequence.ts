@@ -46,7 +46,7 @@ function loadImage(url: string): Promise<HTMLImageElement> {
   return image.decode().then(() => image);
 }
 
-/** Loaded once before __ready. Render never relies on an image decode race. */
+/** Decode before drawing; normal visits prepare this only near the products. */
 export class ProductSequence {
   manifest = fallbackManifest;
   private images: HTMLImageElement[] = [];
@@ -55,11 +55,7 @@ export class ProductSequence {
   private lastImage: HTMLImageElement | null = null;
   error = "";
 
-  async prepare() {
-    const response = await fetch("/media/product/manifest.json");
-    if (!response.ok)
-      throw new Error(`Sequence manifest HTTP ${response.status}`);
-    const data: SequenceManifest = await response.json();
+  async prepare(data: SequenceManifest) {
     if (
       data.version !== 1 ||
       !Number.isFinite(data.fps) ||

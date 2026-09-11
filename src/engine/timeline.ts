@@ -62,6 +62,11 @@ export function initializeTimeline(render: RenderFn) {
   };
 }
 
+/** Refresh decoded assets without pausing playback or resetting user actions. */
+export function repaintTimeline() {
+  if (renderer) renderer(current, experience.sample(current));
+}
+
 export function performAction(action: Action, target?: number) {
   if (!experience.record(action, current, target)) return;
   window.__seek(current);
